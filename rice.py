@@ -44,10 +44,12 @@ from rice_helpers import (
 )
 
 # Set logger level e.g., DEBUG, INFO, WARNING, ERROR.
-logging.getLogger().setLevel(logging.ERROR)
+logging.getLogger().setLevel(logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 _FEATURES = "features"
 _ACTION_MASK = "action_mask"
+_MODERATOR_IDX = -1
 
 
 class Rice:
@@ -66,6 +68,7 @@ class Rice:
         negotiation_on=False,  # If True then negotiation is on, else off
     ):
         """TODO : init docstring"""
+        #logger.info("[init] START")
         assert (
             num_discrete_action_levels > 1
         ), "the number of action levels should be > 1."
@@ -139,6 +142,7 @@ class Rice:
             + self.import_actions_nvec
             + self.tariff_actions_nvec
         )
+        #print(f"before neg: actions_nvec.shape: {len(self.actions_nvec)}")
 
         # Negotiation-related initializations
         if self.negotiation_on:
@@ -153,32 +157,45 @@ class Rice:
             self.proposal_actions_nvec = (
                 [self.num_discrete_action_levels] * 2 * self.num_regions
             )
+            logger.info(f"proposal_actions_nvec.shape: {len(self.proposal_actions_nvec)}")
 
             # Each region evaluates a proposal from every other region,
             # either accept or reject.
             self.evaluation_actions_nvec = [2] * self.num_regions
+            logger.info(f"evaluation_actions_nvec.shape: {len(self.evaluation_actions_nvec)}")
 
             self.actions_nvec += (
                 self.proposal_actions_nvec + self.evaluation_actions_nvec
             )
+            logger.info(f"after neg: actions_nvec.shape: {len(self.actions_nvec)}")
 
         # Set the env action space
-        self.action_space = {
+        action_space = {
             region_id: MultiDiscrete(self.actions_nvec)
-            for region_id in range(self.num_regions)
+              for region_id in range(self.num_regions)
         }
+        # Allow to adjust positive and negative
+        #action_space[_MODERATOR_IDX] = MultiDiscrete(2*np.array(self.actions_nvec)+1)
+        action_space[_MODERATOR_IDX] = MultiDiscrete(self.actions_nvec)
+        #logger.info(f'Action space keys: {action_space.keys()}')
+        self.action_space = action_space
 
         # Set the default action mask (all ones)
         self.len_actions = sum(self.actions_nvec)
         self.default_agent_action_mask = np.ones(self.len_actions, dtype=self.int_dtype)
 
         # Add num_agents attribute (for use with WarpDrive)
-        self.num_agents = self.num_regions
+        self.num_agents = self.num_regions + 1 # Add one for moderator
+        #import pdb; pdb.set_trace()
+        #logger.info("[init] DONE")
+
+
 
     def reset(self):
         """
         Reset the environment
         """
+        #logger.info("[reset] START")
         self.timestep = 0
         self.activity_timestep = 0
         self.current_year = self.start_year
@@ -340,14 +357,22 @@ class Rice:
                 timestep=self.timestep,
             )
 
-        return self.generate_observation()
+        obs = self.generate_observation()
+        obs[_MODERATOR_IDX] = self.get_moderator_observation()
+        #logger.info(f"[reset] obs space keys: {obs.keys()}")
+        #logger.info(f"[reset] Moderator obs: {obs[_MODERATOR_IDX]}")
+        #logger.info("[reset] DONE")
+        return obs
+
 
     def step(self, actions=None):
         """
         The environment step function.
         If negotiation is enabled, it also comprises
         the proposal and evaluation steps.
+
         """
+        #logger.info("[step] START")
         # Increment timestep
         self.timestep += 1
 
@@ -373,7 +398,64 @@ class Rice:
             if self.stage == 2:
                 return self.evaluation_step(actions)
 
-        return self.climate_and_economy_simulation_step(actions)
+        # Add moderator agent that is rewarded by global state and 
+        # adjust actions of regions
+        new_actions = self.step_moderator(actions)
+        obs, reward, done, info = self.climate_and_economy_simulation_step(new_actions)
+        obs[_MODERATOR_IDX] = self.get_moderator_observation()
+        reward[_MODERATOR_IDX] = self.compute_moderator_reward(obs)
+
+        #logger.info("[step] DONE")
+        return obs, reward, done, info
+
+
+    def step_moderator(self, actions):
+      """
+      actions: constants attenuating the actions of the other regions. 
+        This ensures shape is same as actions as with other regions.
+
+      obs: consolidate global temp, carbon mass, capital all regions
+
+      reward: increase as temp and carbon mass decrease and capital increases
+        Possibly just use sum utility over regions
+      """
+      mod_actions = actions[_MODERATOR_IDX]
+      del actions[_MODERATOR_IDX]
+
+      steps = self.num_discrete_action_levels
+      #offset = steps + 1
+      offset = int(steps/2)
+      actions = { k: np.minimum(steps,np.maximum(0,v+mod_actions-offset)) for k,v in actions.items() }
+      return actions
+
+
+    def get_moderator_observation(self):
+      # global_temperature seems to have len == 2
+      global_temperature = self.get_global_state("global_temperature")
+      logger.info(f"[get_moderator_observation.{self.timestep}] global temperature: {global_temperature}")
+      obs = [
+        global_temperature[0]
+      ]
+      
+      logger.info(f"[get_moderator_observation.{self.timestep}] obs: {obs}")
+      return { 'features':obs, 'action_mask': [1] }
+
+
+    # Goal:
+    # max consumption_all_regions
+    # min labor_all_regions
+    # min global_temperature
+    def compute_moderator_reward(self, obs):
+      #logger.info(f"[compute_moderator_reward.{self.timestep}] obs: {obs}")
+      labor = np.mean(self.get_global_state("labor_all_regions"))
+      consumption = np.mean(self.get_global_state("consumption_all_regions"))
+      temperature = self.get_global_state("global_temperature")
+      logger.info(f"[compute_moderator_reward.{self.timestep}] labor: {labor}")
+      logger.info(f"[compute_moderator_reward.{self.timestep}] consumption: {consumption}")
+      logger.info(f"[compute_moderator_reward.{self.timestep}] temperature: {temperature}")
+      reward = consumption - labor - temperature[0]
+      return reward
+
 
     def generate_observation(self):
         """
@@ -951,6 +1033,8 @@ class Rice:
                 for_pref=self.for_pref,  # np.array, sums to (1 - dom_pref)
             )
 
+            #logger.info(f'Got labor: {labor}')
+            #logger.info(f'Got consumption: {consumption}')
             utility = get_utility(labor, consumption, const["xalpha"])
 
             social_welfare = get_social_welfare(

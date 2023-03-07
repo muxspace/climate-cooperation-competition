@@ -16,13 +16,16 @@ saving:
 # Trainer settings
 trainer:
     num_envs: 20 # number of environment replicas
+    #num_envs: 1 # number of environment replicas
     rollout_fragment_length: 100 # divide episodes into fragments of this many steps each during rollouts.
     train_batch_size: 2000 # total batch size used for training per iteration (across all the environments)
-    num_episodes: 100 # number of episodes to run the training for
+    #num_episodes: 100 # number of episodes to run the training for
+    num_episodes: 800 # number of episodes to run the training for
     framework: torch # framework setting.
     # Note: RLlib supports TF as well, but our end-to-end pipeline is built for Pytorch only.
     # === Hardware Settings ===
     num_workers: 4 # number of rollout worker actors to create for parallel sampling.
+    #num_workers: 1 # number of rollout worker actors to create for parallel sampling.
     # Note: Setting the num_workers to 0 will force rollouts to be done in the trainer actor.
     num_gpus: 0 # number of GPUs to allocate to the trainer process. This can also be fractional (e.g., 0.3 GPUs).
 
@@ -43,7 +46,7 @@ policy:
         clip_grad_norm: True # flag indicating whether to clip the gradient norm or not
         max_grad_norm: 0.5 # when clip_grad_norm is True, the clip level
         gamma: 0.92 # discount factor
-        lr: 0.0005 # learning rate
+        lr: 0.0015 # learning rate
         model:
             custom_model: torch_linear
             custom_model_config:
