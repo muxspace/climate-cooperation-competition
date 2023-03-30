@@ -296,7 +296,8 @@ def compute_metrics(
         success = True
         comment = "Successful submission"
     except Exception as err:
-        logging.error(err)
+        #logging.error(err)
+        logging.exception(err)
         success = False
         comment = "Could not obtain an episode rollout!"
         eval_metrics = {}
@@ -481,10 +482,12 @@ def perform_evaluation(
 
                         # Load model checkpoints
                         try:
+                            print('-- LOAD MODEL CHECKPOINTS')
                             load_model_checkpoints(trainer, results_directory)
 
                             # Compute metrics
                             try:
+                                print('-- COMPUTE METRICS')
                                 success, comment, eval_metrics = compute_metrics(
                                     fetch_episode_states,
                                     trainer,

@@ -153,8 +153,14 @@ class EnvWrapper(MultiAgentEnv):
         )
 
         self.action_space = self.env.action_space
+        #logging.info(f"[EnvWrapper.__init__] action_space:")
+        #for k,v in self.action_space.items():
+        #  logging.info(f"[EnvWrapper.__init__] {k}: {v}")
 
         self.observation_space = recursive_obs_dict_to_spaces_dict(self.env.reset())
+        #logging.info(f"[EnvWrapper.__init__] observation_space:")
+        #for k,v in self.observation_space.items():
+        #  logging.info(f"[EnvWrapper.__init__] {k}: {v}")
 
     def reset(self):
         """Reset the env."""
@@ -339,7 +345,7 @@ def fetch_episode_states(trainer_obj=None, episode_states=None):
     agent_states = {}
     policy_ids = {}
     policy_mapping_fn = trainer_obj.config["multiagent"]["policy_mapping_fn"]
-    for region_id in range(env.num_regions):
+    for region_id in range(env.num_agents):
         policy_ids[region_id] = policy_mapping_fn(region_id)
         agent_states[region_id] = trainer_obj.get_policy(
             policy_ids[region_id]
@@ -552,4 +558,8 @@ if __name__ == "__main__":
     )
 
     # Close Ray gracefully after completion
+    output_ts = fetch_episode_states(trainer, desired_outputs)
     ray.shutdown()
+    import opt_helper
+    opt_helper.save(output_ts, f"{save_dir}/output_ts.pkl")
+

@@ -4,7 +4,7 @@ VERSION ?= latest
 IMAGE ?= $(PROJECT):$(VERSION)
 DOCKER_VARS = --user $(shell id -u):$(shell id -g) --group-add users -e GRANT_SUDO=yes
 MOUNT_VARS = -v "${PWD}":/home/jovyan/work -v ${PWD}/ray_results:/home/jovyan/ray_results
-X11_VARS = -e "DISPLAY" -v "/etc/group:/etc/group:ro" -v "/etc/passwd:/etc/passwd:ro" -v "/etc/shadow:/etc/shadow:ro" -v "/etc/sudoers.d:/etc/sudoers.d:ro" -v "/tmp/.X11-unix:/tmp/.X11-unix:rw"
+X11_VARS = -e "DISPLAY" -v "/etc/group:/etc/group:ro" -v "/etc/passwd:/etc/passwd:ro" -v "/etc/shadow:/etc/shadow:ro" -v "/etc/sudoers.d:/etc/sudoers.d:ro" -v "/tmp/.X11-unix:/tmp/.X11-unix:rw" --ipc=host --cap-drop=ALL --security-opt=no-new-privileges
 ALL_VARS = $(DOCKER_VARS) $(MOUNT_VARS) $(X11_VARS)
 
 PYTHONPATH ?= -e PYTHONPATH=scripts
@@ -31,6 +31,15 @@ bash:
 
 python:
 	docker run -it --rm $(ALL_VARS) $(PYTHONPATH) $(IMAGE) python
+
+r:
+	xhost +SI:localuser:$(shell id -un)
+	docker run -it --rm $(ALL_VARS) $(PYTHONPATH) $(IMAGE) R
+
+notebook: all
+	@mkdir -p notebooks
+	docker run -it -p 8888:8888 $(ALL_VARS) -u jovyan -w /app/$(PACKAGE)/notebooks $(IMAGE) jupyter notebook --allow-root
+
 
 # View on http://localhost:6006
 tensorboard:

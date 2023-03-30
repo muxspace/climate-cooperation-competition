@@ -12,6 +12,24 @@ RUN pip3 install --no-cache-dir tensorflow==1.13.2 gym==0.21 ray[rllib]==1.0.0 t
 RUN pip3 install --no-cache-dir importlib-resources ale-py~=0.7.1 \
  && pip3 install --no-cache-dir MarkupSafe==2.0.1
 RUN pip3 install --no-cache-dir scikit-learn matplotlib
+RUN pip3 install --no-cache-dir pickle5 deepdiff ordered-set
+
+RUN wget -qO- https://cloud.r-project.org/bin/linux/ubuntu/marutter_pubkey.asc | sudo tee -a /etc/apt/trusted.gpg.d/cran_ubuntu_key.asc
+RUN echo "deb https://cloud.r-project.org/bin/linux/ubuntu focal-cran40/" >> /etc/apt/sources.list \
+ && apt-get update \
+ && apt-get install -y r-base r-base-dev git
+RUN git clone https://github.com/muxspace/crant.git /app/crant
+ENV PATH="$PATH:/app/crant"
+RUN apt-get install -y libfontconfig1-dev libharfbuzz-dev libfribidi-dev \
+ && apt-get install -y libcurl4-openssl-dev libssl-dev\
+ && apt-get install -y libfreetype6-dev libpng-dev libtiff5-dev libjpeg-dev libxml2-dev
+RUN rpackage testit roxygen2 devtools reticulate formatR
+
+RUN rpackage https://github.com/zatonovo/lambda.r.git
+RUN rpackage https://github.com/zatonovo/lambda.tools.git
+RUN rpackage futile.logger
+#RUN rpackage https://github.com/IRkernel/IRkernel.git
+
 
 USER ${NB_UID}
 WORKDIR "${HOME}/work"

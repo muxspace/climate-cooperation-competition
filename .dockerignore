@@ -2,4 +2,5 @@
 Submissions
 *.pdf
 core
+core.*
 .tmp
