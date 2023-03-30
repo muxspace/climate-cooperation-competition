@@ -49,7 +49,6 @@ logger = logging.getLogger(__name__)
 
 _FEATURES = "features"
 _ACTION_MASK = "action_mask"
-_MODERATOR_IDX = 27
 
 
 class Rice:
@@ -85,6 +84,10 @@ class Rice:
         self.balance_interest_rate = 0.1
 
         self.num_regions = num_regions
+        self.moderator_index = num_regions
+        self.stage = -1
+        logging.info(f"[__init__] Using {num_regions} regions")
+
         self.rice_constant = params["_RICE_CONSTANT"]
         self.dice_constant = params["_DICE_CONSTANT"]
         self.all_constants = self.concatenate_world_and_regional_params(
@@ -174,10 +177,9 @@ class Rice:
             region_id: MultiDiscrete(self.actions_nvec)
               for region_id in range(self.num_regions)
         }
-        # Allow to adjust positive and negative
-        #action_space[_MODERATOR_IDX] = MultiDiscrete(2*np.array(self.actions_nvec)+1)
+
         # len(self.actions_nvec) == 57
-        action_space[_MODERATOR_IDX] = MultiDiscrete(self.actions_nvec)
+        action_space[self.moderator_index] = MultiDiscrete(self.actions_nvec)
         #logger.info(f'Action space keys: {action_space.keys()}')
         #logger.info(f'len(self.actions_nvec): {len(self.actions_nvec)}')
         self.action_space = action_space
@@ -362,9 +364,9 @@ class Rice:
         #logger.info("[reset] generate_observation")
         obs = self.generate_observation()
         #logger.info("[reset] get_moderator_observation")
-        obs[_MODERATOR_IDX] = self.get_moderator_observation()
+        obs[self.moderator_index] = self.get_moderator_observation()
         #logger.info(f"[reset] obs space keys: {obs.keys()}")
-        logger.info(f"[reset] Moderator obs: {obs[_MODERATOR_IDX]}")
+        logger.info(f"[reset] Moderator obs: {obs[self.moderator_index]}")
         #logger.info("[reset] DONE")
         return obs
 
@@ -376,7 +378,7 @@ class Rice:
         the proposal and evaluation steps.
 
         """
-        #logger.info("[step] START")
+        logger.info(f"[step] START stage {self.stage}")
         # Increment timestep
         self.timestep += 1
 
@@ -408,8 +410,8 @@ class Rice:
         new_actions = self.step_moderator(actions)
         #logger.info(f"[0] NEW ACTIONS: {new_actions[0]}")
         obs, reward, done, info = self.climate_and_economy_simulation_step(new_actions)
-        obs[_MODERATOR_IDX] = self.get_moderator_observation()
-        reward[_MODERATOR_IDX] = self.compute_moderator_reward(obs)
+        obs[self.moderator_index] = self.get_moderator_observation()
+        reward[self.moderator_index] = self.compute_moderator_reward(obs)
 
         #logger.info("[step] DONE")
         return obs, reward, done, info
@@ -438,8 +440,8 @@ class Rice:
       Create new step function that modifies action masks based on 
       mitigation rates.
       """
-      mod_actions = actions[_MODERATOR_IDX]
-      del actions[_MODERATOR_IDX]
+      mod_actions = actions[self.moderator_index]
+      del actions[self.moderator_index]
 
       steps = self.num_discrete_action_levels
       #offset = steps + 1
@@ -467,8 +469,8 @@ class Rice:
         Possibly just use sum utility over regions
 
       """
-      mod_actions = actions[_MODERATOR_IDX]
-      del actions[_MODERATOR_IDX]
+      mod_actions = actions[self.moderator_index]
+      del actions[self.moderator_index]
 
       steps = self.num_discrete_action_levels
       #offset = steps + 1
