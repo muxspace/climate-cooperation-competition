@@ -86,7 +86,7 @@ class Rice:
         self.num_regions = num_regions
         self.moderator_index = num_regions
         self.stage = -1
-        logging.info(f"[__init__] Using {num_regions} regions")
+        #logging.info(f"[__init__] Using {num_regions} regions")
 
         self.rice_constant = params["_RICE_CONSTANT"]
         self.dice_constant = params["_DICE_CONSTANT"]
@@ -147,10 +147,11 @@ class Rice:
         )
         #print(f"before neg: actions_nvec.shape: {len(self.actions_nvec)}")
 
+        # Always initialize these instance variables
+        self.stage = 0
+        self.num_negotiation_stages = 2  # proposal and evaluation steps
         # Negotiation-related initializations
         if self.negotiation_on:
-            self.stage = 0
-            self.num_negotiation_stages = 2  # proposal and evaluation steps
             self.episode_length += (
                 self.dice_constant["xN"] * self.num_negotiation_stages
             )
@@ -179,6 +180,7 @@ class Rice:
         }
 
         # len(self.actions_nvec) == 57
+        logger.info(f'[__init__] Add moderator to action space at {self.moderator_index}')
         action_space[self.moderator_index] = MultiDiscrete(self.actions_nvec)
         #logger.info(f'Action space keys: {action_space.keys()}')
         #logger.info(f'len(self.actions_nvec): {len(self.actions_nvec)}')
@@ -378,7 +380,7 @@ class Rice:
         the proposal and evaluation steps.
 
         """
-        logger.info(f"[step] START stage {self.stage}")
+        #logger.info(f"[step] START stage {self.stage}")
         # Increment timestep
         self.timestep += 1
 
@@ -392,53 +394,37 @@ class Rice:
         self.set_global_state(
             "timestep", self.timestep, self.timestep, dtype=self.int_dtype
         )
-        if self.negotiation_on:
-            # Note: The '+1` below is for the climate_and_economy_simulation_step
-            self.stage = self.timestep % (self.num_negotiation_stages + 1)
+
+        # Note: The '+1` below is for the climate_and_economy_simulation_step
+        self.stage = self.timestep % (self.num_negotiation_stages + 1)
+        if self.negotiation_on and self.stage > 0:
             self.set_global_state(
                 "stage", self.stage, self.timestep, dtype=self.int_dtype
             )
             if self.stage == 1:
-                return self.proposal_step(actions)
+                obs, reward, done, info = self.proposal_step(actions)
 
             if self.stage == 2:
-                return self.evaluation_step(actions)
+                obs, reward, done, info = self.evaluation_step(actions)
 
-        # Add moderator agent that is rewarded by global state and 
-        # adjust actions of regions
-        #logger.info(f"[0] OLD ACTIONS: {actions[0]}")
-        new_actions = self.step_moderator(actions)
-        #logger.info(f"[0] NEW ACTIONS: {new_actions[0]}")
-        obs, reward, done, info = self.climate_and_economy_simulation_step(new_actions)
+        else:
+          # Add moderator agent that is rewarded by global state and 
+          # adjust actions of regions
+          #logger.info(f"[{self.timestep}] OLD ACTIONS: {actions.keys()}")
+          new_actions = self.step_moderator(actions)
+          #logger.info(f"[{self.timestep}] NEW ACTIONS: {new_actions.keys()}")
+          obs, reward, done, info = self.climate_and_economy_simulation_step(new_actions)
+
         obs[self.moderator_index] = self.get_moderator_observation()
         reward[self.moderator_index] = self.compute_moderator_reward(obs)
 
-        #logger.info("[step] DONE")
         return obs, reward, done, info
 
 
     def step_moderator(self, actions):
-      return self.step_moderator_nego_on(actions)
-
-
-    def step_moderator_nego_off(self, actions):
       """
-      actions: constants attenuating the actions of the other regions. 
-        This ensures shape is same as actions as with other regions.
-
-      obs: consolidate global temp, carbon mass, capital all regions
-
-      reward: increase as temp and carbon mass decrease and capital increases
-        Possibly just use sum utility over regions
-
-      TODO (2)
-
-      Enable negotiation
-
-      TODO (3)
-
-      Create new step function that modifies action masks based on 
-      mitigation rates.
+      Actions include tariffs, so this step works equally well with or without
+      negotiation.
       """
       mod_actions = actions[self.moderator_index]
       del actions[self.moderator_index]
@@ -447,69 +433,49 @@ class Rice:
       #offset = steps + 1
       offset = int(steps/2)
       #logger.info(f"MODERATOR ACTION: {mod_actions-offset}")
-      actions = { k: np.minimum(steps,np.maximum(0,v+mod_actions-offset)) for k,v in actions.items() }
+      actions = { k: np.minimum(steps,np.maximum(0,v+mod_actions-offset)) 
+        for k,v in actions.items() }
       return actions
 
-
-    def step_moderator_nego_on(self, actions):
-      """
-      TODO:
-      Version with negotiation on. This modifies action masks based on 
-      mitigation rates.
-
-      self.stage == 1: proposal step
-      self.stage == 2: evaluation step
-
-      actions: constants attenuating the actions of the other regions. 
-        This ensures shape is same as actions as with other regions.
-
-      obs: consolidate global temp, carbon mass, capital all regions
-
-      reward: increase as temp and carbon mass decrease and capital increases
-        Possibly just use sum utility over regions
-
-      """
-      mod_actions = actions[self.moderator_index]
-      del actions[self.moderator_index]
-
-      steps = self.num_discrete_action_levels
-      #offset = steps + 1
-      offset = int(steps/2)
-      #logger.info(f"MODERATOR ACTION: {mod_actions-offset}")
-      actions = { k: np.minimum(steps,np.maximum(0,v+mod_actions-offset)) for k,v in actions.items() }
-      return actions
 
 
     def get_moderator_observation(self):
-      """
-      TODO (1)
+      if self.negotiation_on:
+        return self.get_moderator_observation_nego_on()
+      return self.get_moderator_observation_nego_off()
 
-      Include
+
+    def get_moderator_observation_nego_off(self):
+      """
+      Includes
+      . temperature
+      . carbon mass
       . mitigation rate
       . consumption
       . imports
       . exports
-      . carbon mass
-      . temperature
       """
       # global_temperature seems to have len == 2
-      mitigation_rate_all_regions = self.get_global_state("mitigation_rate_all_regions")
-      consumption_all_regions = self.get_global_state("consumption_all_regions")
       global_temperature = self.get_global_state("global_temperature")
+      global_carbon_mass = self.get_global_state("global_carbon_mass")
+      mitigation_rate_all_regions = \
+        self.get_global_state("mitigation_rate_all_regions")
+      consumption_all_regions = self.get_global_state("consumption_all_regions")
+      max_export_all_regions = self.get_global_state("max_export_limit_all_regions")
 
       #logger.info(f"[get_moderator_observation.{self.timestep}] mitigation_rate_all_regions: {mitigation_rate_all_regions}")
       #logger.info(f"[get_moderator_observation.{self.timestep}] consumption_all_regions: {consumption_all_regions}")
       #logger.info(f"[get_moderator_observation.{self.timestep}] global temperature: {global_temperature}")
 
-      if self.negotiation_on:
-        feature_length = 1207
-      else:
-        feature_length = 1043
+      feature_length = 1043
 
       obs = np.concatenate([
+        global_temperature,
+        global_carbon_mass,
         mitigation_rate_all_regions,
         consumption_all_regions,
-        global_temperature])
+        max_export_all_regions
+      ])
       # Pad to same length as all_features
       obs = np.concatenate([obs, np.zeros(feature_length - len(obs))])
       
@@ -518,11 +484,42 @@ class Rice:
       return { 'features':obs, 'action_mask': [1] }
 
 
-    # Goal:
-    # -max consumption_all_regions
-    # +max gross_output_all_regions
-    # +min labor_all_regions
-    # +min global_temperature
+    def get_moderator_observation_nego_on(self):
+      """
+
+      Include
+      . carbon mass
+      . temperature
+      . mitigation rate
+      . min mitigation rate
+      . consumption
+      """
+      # global_temperature seems to have len == 2
+      global_temperature = self.get_global_state("global_temperature")
+      global_carbon_mass = self.get_global_state("global_carbon_mass")
+      mitigation_rate_all_regions = \
+        self.get_global_state("mitigation_rate_all_regions")
+      minimum_mitigation_rate_all_regions = \
+        self.get_global_state("minimum_mitigation_rate_all_regions")
+      consumption_all_regions = self.get_global_state("consumption_all_regions")
+
+      feature_length = 1207
+
+      obs = np.concatenate([
+        global_temperature,
+        #global_carbon_mass,
+        #mitigation_rate_all_regions,
+        minimum_mitigation_rate_all_regions,
+        consumption_all_regions
+      ])
+      # Pad to same length as all_features
+      obs = np.concatenate([obs, np.zeros(feature_length - len(obs))])
+      
+      #logger.info(f"[get_moderator_observation.{self.timestep}] obs: {obs}")
+      # len(action_mask): 570
+      return { 'features':obs, 'action_mask': [1] }
+
+
     def compute_moderator_reward(self, obs):
       #logger.info(f"[compute_moderator_reward.{self.timestep}] obs: {obs}")
       gross_output = np.mean(self.get_global_state("gross_output_all_regions"))
@@ -530,11 +527,7 @@ class Rice:
       #labor = np.mean(self.get_global_state("labor_all_regions"))
       carbon = np.mean(self.get_global_state("global_carbon_mass"))
       temperature = self.get_global_state("global_temperature")
-      #logger.info(f"[compute_moderator_reward.{self.timestep}] gross output: {gross_output}")
-      #logger.info(f"[compute_moderator_reward.{self.timestep}] consumption: {consumption}")
-      #logger.info(f"[compute_moderator_reward.{self.timestep}] labor: {labor}")
-      #logger.info(f"[compute_moderator_reward.{self.timestep}] temperature: {temperature}")
-      #reward = consumption - labor - temperature[0]
+
       reward = gross_output * consumption - carbon * temperature[0]
       logger.info(f"[compute_moderator_reward.{self.timestep}] reward: {reward}")
       return reward
@@ -657,8 +650,8 @@ class Rice:
 
         # Fetch the action mask dictionary, keyed by region_id.
         action_mask_dict = self.generate_action_mask()
-        # 570
-        logger.info(f"len(action_mask_dict[0]): {len(action_mask_dict[0])}")
+        # 570 or 1164
+        #logger.info(f"len(action_mask_dict[0]): {len(action_mask_dict[0])}")
 
         # Form the observation dictionary keyed by region id.
         obs_dict = {}
@@ -668,7 +661,7 @@ class Rice:
                 _ACTION_MASK: action_mask_dict[region_id],
             }
 
-        logger.info("[generate_observation] DONE")
+        #logger.info("[generate_observation] DONE")
         return obs_dict
 
     def generate_action_mask(self):
@@ -697,7 +690,7 @@ class Rice:
                 mask_start = sum(self.savings_action_nvec)
                 mask_end = mask_start + sum(self.mitigation_rate_action_nvec)
                 mask[mask_start:mask_end] = mitigation_mask
-            #print(f"[{region_id}] mask: {mask}")
+                #logger.info(f"[T{self.timestep} R{region_id}] mask[{mask_start}:{mask_end}]: {mitigation_mask}")
             mask_dict[region_id] = mask
 
         return mask_dict
@@ -711,7 +704,9 @@ class Rice:
         assert self.stage == 1
 
         assert isinstance(actions, dict)
-        assert len(actions) == self.num_regions + 1
+        assert len(actions) == self.num_regions + 1 # Account for moderator
+
+        #logging.info(f"[proposal_step] actions.keys: {actions.keys()}")
 
         action_offset_index = len(
             self.savings_action_nvec
@@ -751,6 +746,7 @@ class Rice:
         info = {}
         return obs, rew, done, info
 
+
     def evaluation_step(self, actions=None):
         """
         Update minimum mitigation rates
@@ -759,7 +755,9 @@ class Rice:
         assert self.stage == 2
 
         assert isinstance(actions, dict)
-        assert len(actions) == self.num_regions
+        assert len(actions) == self.num_regions + 1 # Account for moderator
+
+        #logging.info(f"[evaluation_step] actions.keys: {actions.keys()}")
 
         action_offset_index = len(
             self.savings_action_nvec
