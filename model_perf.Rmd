@@ -1,0 +1,145 @@
+---
+title: Analysis of RL agent performance
+author: Brian Lee Yung Rowe
+output: pdf_document
+---
+
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+library(reticulate)
+source("model_perf.R")
+#lst <- py_load_object('.tmp/rice/experiments/1680030267/output_ts.pkl')
+lst <- py_load_object('.tmp/rice/experiments/1680203021/output_ts.pkl')
+```
+
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+lst$consumption_all_regions # Gives reward for each region
+
+plot_region_var(lst$mitigation_rate_all_regions)
+```
+
+# Results
+## Three observation variables
+
+*BEST*
+Submissions/1680131769.zip
+Cores: 6
+Action levels: 10
+Negotiation: off
+Episodes: 20000
+Metrics: {'Episode Reward': 133.13, 'Temperature Rise': 1.35, 'Carbon Mass': 873, 'Capital': 9923, 'Production': 4981, 'Gross Output': 4441, 'Investment': 879, 'Abatement Cost': 64.03, 'climate_index': 0.98, 'economic_index': 0.42}
+
+
+Submissions/1680143340.zip
+Cores: 6
+Action levels: 10
+Negotiation: off
+Episodes: 20000
+Metrics: {'Episode Reward': 123.46, 'Temperature Rise': 1.37, 'Carbon Mass': 876, 'Capital': 982, 'Production': 2374, 'Gross Output': 2129, 'Investment': 75, 'Abatement Cost': 63.97, 'climate_index': 0.98, 'economic_index': 0.17}
+
+Submissions/1680178163.zip
+Cores: 6
+Action levels: 10
+Negotiation: off
+Episodes: 20000
+Duration: 73m38.190s
+Metrics: {'Episode Reward': 160.02, 'Temperature Rise': 4.07, 'Carbon Mass': 2314, 'Capital': 11478, 'Production': 5197, 'Gross Output': 5032, 'Investment': 1016, 'Abatement Cost': 6.27, 'climate_index': 0.51, 'economic_index': 0.49}
+
+
+
+Submissions/1680185932.zip
+Cores: 6
+Action levels: 10
+Negotiation: on
+Episodes: 10000
+Duration: 168m33.213s
+Metrics: {'Episode Reward': 81.74, 'Temperature Rise': 1.33, 'Carbon Mass': 870, 'Capital': 644, 'Production': 3371, 'Gross Output': 3050, 'Investment': 18, 'Abatement Cost': 185.43, 'climate_index': 0.99, 'economic_index': 0.27}
+
+
+Submissions/1680196934.zip
+Cores: 6
+Action levels: 10
+Negotiation: on
+Episodes: 100
+Duration: 2m45.787s
+Metrics: {'Episode Reward': 109.11, 'Temperature Rise': 2.1, 'Carbon Mass': 1174, 'Capital': 75259, 'Production': 18907, 'Gross Output': 17277, 'Investment': 6720, 'Abatement Cost': 145.96, 'climate_index': 0.85, 'economic_index': 1.84}
+
+
+Submissions/1680197345.zip
+Cores: 6
+Action levels: 20
+Negotiation: on
+Episodes: 1000
+Duration: 22m17.691s
+Metrics: {'Episode Reward': 118.67, 'Temperature Rise': 1.61, 'Carbon Mass': 979, 'Capital': 41446, 'Production': 15262, 'Gross Output': 13747, 'Investment': 3758, 'Abatement Cost': 170.16, 'climate_index': 0.94, 'economic_index': 1.45}
+
+
+*BEST*
+Submissions/1680203021.zip
+Cores: 6
+Action levels: 20
+Negotiation: on
+Episodes: 2000
+Duration: 39m28.295s
+Metrics: {'Episode Reward': 154.21, 'Temperature Rise': 1.61, 'Carbon Mass': 979, 'Capital': 37257, 'Production': 15128, 'Gross Output': 13638, 'Investment': 3374, 'Abatement Cost': 168.05, 'climate_index': 0.94, 'economic_index': 1.44}
+
+
+## Five observation variables
+
+Submissions/1680205522.zip
+Cores: 6
+Action levels: 20
+Negotiation: on
+Episodes: 2000
+Duration: 39m34.836s
+Metrics: {'Episode Reward': 152.54, 'Temperature Rise': 1.77, 'Carbon Mass': 1039, 'Capital': 21161, 'Production': 13254, 'Gross Output': 12063, 'Investment': 1872, 'Abatement Cost': 157.88, 'climate_index': 0.91, 'economic_index': 1.26}
+
+## Four observation variables
+
+Submissions/1680211143.zip
+Cores: 6
+Action levels: 20
+Negotiation: on
+Episodes: 2000
+Duration: 39m10.686s
+Metrics: {'Episode Reward': 112.55, 'Temperature Rise': 1.54, 'Carbon Mass': 953, 'Capital': 14300, 'Production': 10798, 'Gross Output': 9713, 'Investment': 1271, 'Abatement Cost': 172.76, 'climate_index': 0.95, 'economic_index': 1.0}
+
+
+## Three observation variables
+obs = np.concatenate([
+        global_temperature,
+        #global_carbon_mass,
+        #mitigation_rate_all_regions,
+        minimum_mitigation_rate_all_regions,
+        consumption_all_regions
+      ])
+
+Submissions/1680213635.zip
+Cores: 6
+Action levels: 20
+Negotiation: on
+Episodes: 2000
+Duration: 37m53.227s
+Metrics: {'Episode Reward': 121.1, 'Temperature Rise': 1.52, 'Carbon Mass': 933, 'Capital': 24284, 'Production': 12622, 'Gross Output': 11318, 'Investment': 2333, 'Abatement Cost': 178.4, 'climate_index': 0.95, 'economic_index': 1.18}
+
+
+
+## Min mitigation with economic index calc fix
+
+global_temperature,
+        global_carbon_mass,
+        minimum_mitigation_rate_all_regions,
+        consumption_all_regions
+
+Submissions/1680213635.zip
+Cores: 6
+Action levels: 20
+Negotiation: on
+Episodes: 2000
+Duration: 220m41.223s
+Metrics: {'Episode Reward': 121.1, 'Temperature Rise': 1.52, 'Carbon Mass': 933, 'Capital': 24284, 'Production': 12622, 'Gross Output': 3977, 'Investment': 2333, 'Abatement Cost': 178.4, 'climate_index': 0.95, 'economic_index': 0.37}
+
+
+
+
