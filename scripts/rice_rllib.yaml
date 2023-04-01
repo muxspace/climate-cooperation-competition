@@ -41,8 +41,8 @@ policy:
         entropy_coeff_schedule: # loss coefficient schedule for the entropy loss
         # piecewise linear, specified as (timestep, value)
             - [0, 0.5]
-            - [1000000, 0.1]
-            - [5000000, 0.05]
+            - [10000, 0.1]
+            - [50000, 0.05]
         clip_grad_norm: True # flag indicating whether to clip the gradient norm or not
         max_grad_norm: 0.5 # when clip_grad_norm is True, the clip level
         gamma: 0.86 # discount factor
