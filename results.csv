@@ -1,0 +1,143 @@
+model,file,cores,action.levels,negotiation,episodes,duration,kappa,episode.reward,temp.rise,carbon.mass,capital,production,gross.output,investment,abatement.cost,climate_index,economic_index
+,,,,,,,,,,,,,,,,,
+## Three observation variables,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,
+#Submissions/1680131769.zip,6,10,off,20000,NA,NA,NA,133.13,1.35,873,9923,4981,4441,879,64.03,0.98,0.42
+#Submissions/1680143340.zip,6,10,off,20000,NA,NA,NA,123.46,1.37,876,982,2374,2129,75,63.97,0.98,0.17
+#Submissions/1680178163.zip,6,10,off,20000,73m38.190s,NA,NA,160.02,4.07,2314,11478,5197,5032,1016,6.27,0.51,0.49
+#Submissions/1680185932.zip,6,10,on,10000,168m33.213s,NA,NA,81.74,1.33,870,644,3371,3050,18,185.43,0.99,0.27
+#Submissions/1680196934.zip,6,10,on,100,2m45.787s,NA,NA,109.11,2.1,1174,75259,18907,17277,6720,145.96,0.85,1.84
+#Submissions/1680197345.zip,6,20,on,1000,22m17.691s,NA,NA,118.67,1.61,979,41446,15262,13747,3758,170.16,0.94,1.45
+#Submissions/1680203021.zip,6,20,on,2000,39m28.295s,NA,NA,154.21,1.61,979,37257,15128,13638,3374,168.05,0.94,1.44
+,,,,,,,,,,,,,,,,,
+## Five observation variables,,,,,,,,,,,,,,,,,
+#Submissions/1680205522.zip,6,20,on,2000,39m34.836s,NA,NA,152.54,1.77,1039,21161,13254,12063,1872,157.88,0.91,1.26
+,,,,,,,,,,,,,,,,,
+## Four observation variables,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,
+#Submissions/1680211143.zip,6,20,on,2000,39m10.686s,NA,NA,112.55,1.54,953,14300,10798,9713,1271,172.76,0.95,1
+,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,
+## Three observation variables,,,,,,,,,,,,,,,,,
+#obs = np.concatenate([,,,,,,,,,,,,,,,,,
+#        global_temperature,,,,,,,,,,,,,,,,,
+#        #global_carbon_mass,,,,,,,,,,,,,,,,,
+#        #mitigation_rate_all_regions,,,,,,,,,,,,,,,,,
+#        minimum_mitigation_rate_all_regions,,,,,,,,,,,,,,,,,
+#        consumption_all_regions,,,,,,,,,,,,,,,,,
+#      ]),,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,
+#O3A,Submissions/1680213635.zip,6,20,on,2000,37m53.227s,NA,121.1,1.52,933,24284,12622,11318,2333,178.4,0.95,1.18
+,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,
+########### IGNORE EVERYTHING ABOVE SINCE RAN WITH CLIMATE INDEX BUG ##########,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,
+## Min mitigation with economic index calc fix,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,
+O4A,Submissions/1680213635.zip,6,20,on,2000,220m41.223s,NA,125.9,1.25,852,7281,8496,2639,635,195.44,1,0.22
+O5A,Submissions/1680368471.zip,6,20,on,2000,42m39.912s,NA,138.04,2.65,1428,17673,12185,4001,1575,84.28,0.76,0.37
+O5B,NA,NA,NA,on,NA,NA,NA,81.06,1.58,952,1470,4457,1418,95,125.75,0.94,0.09
+O5B,NA,NA,NA,on,NA,NA,NA,67.75,1.25,852,509,2329,719,6,195.45,1,0.01
+O5C,Submissions/1680380913.zip,6,20,on,2000,40m42.624s,NA,133.09,2.77,1490,5178,7707,2610,442,29.8,0.74,0.22
+O5C,NA,NA,NA,on,NA,NA,NA,59.69,1.26,853,439,1997,607,0,192.25,1,0
+,,,,,,,,,,,,,,,,,
+#global_temperature,,,,,,,,,,,,,,,,,
+#        #global_carbon_mass,,,,,,,,,,,,,,,,,
+#        #mitigation_rate_all_regions,,,,,,,,,,,,,,,,,
+#        minimum_mitigation_rate_all_regions,,,,,,,,,,,,,,,,,
+#        consumption_all_regions,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,
+## Return to original piecewise entropy settings,,,,,,,,,,,,,,,,,
+K3B,NA,NA,NA,on,NA,NA,NA,139.48,1.71,1012,11910,10191,3256,1129,157.89,0.92,0.29
+K3B,Submissions/1680390121.zip,6,20,on,10000,195m38.043s,0.5,163.32,3.3,1785,32421,15068,4991,2875,53.02,0.64,0.48
+K3B,Submissions/1680479419.zip,6,20,on,12000,206m47.917s,0.6,156.38,1.43,914,29536,14635,4549,2619,186.91,0.97,0.43
+K3B,Submissions/1680525149.zip,6,20,on,2000,35m38.615s,0.6,101.61,1.55,940,1910,5205,1671,134,157.16,0.95,0.12
+,,,,,,,,,,,,,,,,,
+#*BEST*,,,,,,,,,,,,,,,,,
+K3B,Submissions/1680542197.zip,6,20,on,10000,192m9.657s,0.6,151.01,1.5,938,106174,21290,6630,9533,172.72,0.96,0.66
+K3B,Submissions/1680613441.zip,6,20,on,4000,86m53.565s,0.4,166.04,4.54,2673,45168,16614,5576,4017,18.55,0.43,0.55
+K3B,Submissions/1680631690.zip,6,20,on,4000,87m8.460s,0.55,122.51,1.72,1006,9805,8788,2829,955,151.67,0.92,0.25
+K3B,Submissions/1680638925.zip,6,20,on,4000,82m37.896s,0.45,155.49,3.7,2000,15533,11737,3958,1352,18.41,0.57,0.37
+,,,,,,,,,,,,,,,,,
+## Reward without consumption,,,,,,,,,,,,,,,,,
+#Pretty much worse in all regards,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,
+K3B1,Submissions/1680576820.zip,6,20,on,10000,187m9.561s,0.6,125.68,1.74,1015,5409,7556,2435,487,146.38,0.91,0.2
+,,,,,,,,,,,,,,,,,
+## Scaled moderator actions,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,
+K3B2,Submissions/1680618900.zip,6,20,on,4000,81m55.900s,0.4,151.01,2.57,1416,13926,11317,3713,1260,101.61,0.77,0.34
+K3B2,Submissions/1680625092.zip,6,20,on,4000,88m40.780s,0.4,133.27,2.34,1267,3094,7476,2467,237,84.93,0.81,0.21
+,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,
+## Add abatement cost to observations,,,,,,,,,,,,,,,,,
+#obs = np.concatenate([,,,,,,,,,,,,,,,,,
+#        global_temperature,,,,,,,,,,,,,,,,,
+#        #global_carbon_mass,,,,,,,,,,,,,,,,,
+#        #mitigation_rate_all_regions,,,,,,,,,,,,,,,,,
+#        minimum_mitigation_rate_all_regions,,,,,,,,,,,,,,,,,
+#        consumption_all_regions,,,,,,,,,,,,,,,,,
+#        #savings_all_regions,,,,,,,,,,,,,,,,,
+#        abatement_cost_all_regions,,,,,,,,,,,,,,,,,
+#      ]),,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,
+K4B,Submissions/1680645852.zip,6,20,on,10000,225m39.731s,0.6,144.44,2.77,1496,8816,9538,3193,770,50.23,0.74,0.29
+K4B,Submissions/1680661556.zip,6,20,on,10000,219m13.951s,0.4,162.67,4.22,2395,22991,13688,4610,2019,15.97,0.48,0.44
+,,,,,,,,,,,,,,,,,
+## Add damages to observation and revert to regular mitigation rate,,,,,,,,,,,,,,,,,
+#obs = np.concatenate([,,,,,,,,,,,,,,,,,
+#        global_temperature,,,,,,,,,,,,,,,,,
+#        mitigation_rate_all_regions,,,,,,,,,,,,,,,,,
+#        consumption_all_regions,,,,,,,,,,,,,,,,,
+#        abatement_cost_all_regions,,,,,,,,,,,,,,,,,
+#        damages_all_regions,,,,,,,,,,,,,,,,,
+#      ]),,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,
+K5B,Submissions/1680696424.zip,6,20,on,4000,93m2.163s,0.4,163.62,4.14,2382,40356,16033,5376,3632,35.94,0.5,0.53
+K5B,Submissions/1680702098.zip,6,20,on,10000,205m58.370s,0.6,77.74,2,1051,1452,3609,1162,83,66.69,0.87,0.06
+K5B,Submissions/1680718474.zip,6,20,on,4000,84m38.169s,0.45,163.91,4.27,2464,48101,16899,5646,4287,46.77,0.48,0.56
+K5B,Submissions/1680730591.zip,6,20,on,4000,103m9.971s,0.55,131.64,1.35,880,9155,9498,2954,781,181.81,0.98,0.26
+K3B,Submissions/1681824948.zip,6,20,on,12000,231m49.056s,0.55,118.06,2.82,1498,2736,6000,2002,191,41.08,0.73,0.15
+
+K3R2,Submissions/1682013739.zip,6,20,on,2000,50m52.290s,.55,
+Metrics: {'Episode Reward': 163.5, 'Temperature Rise': 4.08, 'Carbon Mass': 2342, 'Capital': 55958, 'Production': 17445, 'Gross Output': 5854, 'Investment': 5141, 'Abatement Cost': 28.32, 'climate_index': 0.51, 'economic_index': 0.58}
+
+K3R2,Submissions/1682017571.zip,6,20,on,2000,43m27.326s,.55,
+Metrics: {'Episode Reward': 154.85, 'Temperature Rise': 4.57, 'Carbon Mass': 2695, 'Capital': 71833, 'Production': 19031, 'Gross Output': 6363, 'Investment': 6416, 'Abatement Cost': 31.3, 'climate_index': 0.42, 'economic_index': 0.63}
+
+K3R2,Submissions/1682026216.zip,6,20,on,2000,44m51.911s,.55,
+Metrics: {'Episode Reward': 160.95, 'Temperature Rise': 4.44, 'Carbon Mass': 2605, 'Capital': 99737, 'Production': 20934, 'Gross Output': 6972, 'Investment': 8929, 'Abatement Cost': 32.25, 'climate_index': 0.45, 'economic_index': 0.7}
+
+K3R2,Submissions/1682029683.zip,6,20,on,4000,80m41.900s,.55,
+Metrics: {'Episode Reward': 159.78, 'Temperature Rise': 4.01, 'Carbon Mass': 2260, 'Capital': 100304, 'Production': 20978, 'Gross Output': 6934, 'Investment': 8984, 'Abatement Cost': 53.24, 'climate_index': 0.52, 'economic_index': 0.7}
+
+K3R2,Submissions/1682034986.zip,6,20,on,4000,80m34.973s,.55,
+Metrics: {'Episode Reward': 155.14, 'Temperature Rise': 3.4, 'Carbon Mass': 1811, 'Capital': 52271, 'Production': 17056, 'Gross Output': 5598, 'Investment': 4805, 'Abatement Cost': 76.25, 'climate_index': 0.63, 'economic_index': 0.55}
+
+
+K3R2,Submissions/1682081494.zip,6,20,on,4000,79m41.533s,.6,
+Metrics: {'Episode Reward': 151.39, 'Temperature Rise': 4.04, 'Carbon Mass': 2315, 'Capital': 130821, 'Production': 22656, 'Gross Output': 7432, 'Investment': 11740, 'Abatement Cost': 81.79, 'climate_index': 0.52, 'economic_index': 0.75}
+
+K3R2,Submissions/1682086891.zip,6,20,on,4000,76m24.624s,.6,
+Metrics: {'Episode Reward': 133.0, 'Temperature Rise': 4.44, 'Carbon Mass': 2591, 'Capital': 117474, 'Production': 21981, 'Gross Output': 7308, 'Investment': 10524, 'Abatement Cost': 36.81, 'climate_index': 0.45, 'economic_index': 0.74}
+
+K3R2,Submissions/1682092243.zip,6,20,on,4000,75m55.088s,.6,
+Metrics: {'Episode Reward': 155.23, 'Temperature Rise': 4.68, 'Carbon Mass': 2808, 'Capital': 71949, 'Production': 19041, 'Gross Output': 6372, 'Investment': 6426, 'Abatement Cost': 22.72, 'climate_index': 0.4, 'economic_index': 0.64}
+
+K3R2,Submissions/1682107329.zip,6,20,on,4000,74m43.043s,.6,
+Metrics: {'Episode Reward': 131.78, 'Temperature Rise': 4.69, 'Carbon Mass': 2809, 'Capital': 102242, 'Production': 21127, 'Gross Output': 7056, 'Investment': 9149, 'Abatement Cost': 20.64, 'climate_index': 0.4, 'economic_index': 0.71}
+
+
+K3R2,Submissions/1682112422.zip,6,20,on,4000,81m8.546s,.75,
+Metrics: {'Episode Reward': 160.77, 'Temperature Rise': 4.7, 'Carbon Mass': 2866, 'Capital': 81818, 'Production': 19692, 'Gross Output': 6570, 'Investment': 7377, 'Abatement Cost': 40.34, 'climate_index': 0.4, 'economic_index': 0.66}
+
+K3R2,Submissions/1682118179.zip,6,20,on,4000,74m28.084s,1.5,
+Metrics: {'Episode Reward': 157.58, 'Temperature Rise': 4.39, 'Carbon Mass': 2552, 'Capital': 117189, 'Production': 21963, 'Gross Output': 7295, 'Investment': 10501, 'Abatement Cost': 35.17, 'climate_index': 0.45, 'economic_index': 0.74}
+
+K3R2,Submissions/1682126617.zip,6,20,on,4000,79m11.592s,1.5,
+Metrics: {'Episode Reward': 161.37, 'Temperature Rise': 4.93, 'Carbon Mass': 3027, 'Capital': 102190, 'Production': 21106, 'Gross Output': 7052, 'Investment': 9144, 'Abatement Cost': 17.24, 'climate_index': 0.36, 'economic_index': 0.71}
+
+K3R2,Submissions/,6,20,on,4000,,1.5,
+
+K3R2,Submissions/,6,20,on,4000,,2,
